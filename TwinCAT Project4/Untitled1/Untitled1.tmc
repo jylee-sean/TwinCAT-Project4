@@ -90,7 +90,7 @@
           <AreaNo AreaType="OutputSrc" CreateSymbols="true">1</AreaNo>
           <Name>Outputs</Name>
           <ContextId>1</ContextId><Symbol><Name>control_word</Name><BaseType GUID="{18071995-0000-0000-0000-000000000005}">UINT</BaseType></Symbol><Symbol><Name>target</Name><BaseType GUID="{18071995-0000-0000-0000-000000000009}">DINT</BaseType></Symbol><Symbol><Name>mode</Name><BaseType GUID="{18071995-0000-0000-0000-000000000003}">SINT</BaseType></Symbol><Symbol><Name>vel</Name><BaseType GUID="{18071995-0000-0000-0000-000000000008}">UDINT</BaseType></Symbol><Symbol><Name>acc</Name><BaseType GUID="{18071995-0000-0000-0000-000000000008}">UDINT</BaseType></Symbol><Symbol><Name>dec</Name><BaseType GUID="{18071995-0000-0000-0000-000000000008}">UDINT</BaseType></Symbol>
-        </DataArea><DataArea><AreaNo AreaType="Standard">4</AreaNo><Name>DataArea3</Name><ContextId>1</ContextId><Symbol><Name>state</Name><BaseType GUID="{18071995-0000-0000-0000-000000000006}">INT</BaseType></Symbol><Symbol><Name>target_position</Name><BaseType GUID="{18071995-0000-0000-0000-000000000009}">DINT</BaseType></Symbol></DataArea>
+        </DataArea><DataArea><AreaNo AreaType="Standard">4</AreaNo><Name>DataArea3</Name><ContextId>1</ContextId><Symbol><Name>command</Name><BaseType GUID="{18071995-0000-0000-0000-000000000006}">INT</BaseType></Symbol><Symbol><Name>target_position</Name><BaseType GUID="{18071995-0000-0000-0000-000000000009}">DINT</BaseType></Symbol></DataArea>
       </DataAreas>
       <InterfacePointers>
         <InterfacePointer>

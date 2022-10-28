@@ -184,7 +184,7 @@
 								<ContextId>1</ContextId>
 								<ByteSize>6</ByteSize>
 								<Symbol>
-									<Name>state</Name>
+									<Name>command</Name>
 									<BitSize>16</BitSize>
 									<BaseType GUID="{18071995-0000-0000-0000-000000000006}">INT</BaseType>
 									<BitOffs>0</BitOffs>
