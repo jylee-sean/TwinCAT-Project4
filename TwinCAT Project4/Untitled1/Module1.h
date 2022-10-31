@@ -113,89 +113,70 @@ protected:
 	};
 	ULONG  m_ReadByOidAndPid;
 	
-	std::vector<Motor> motors; // motors(10) ?? static ??
-
+	std::vector<Motor> motors; 
 	static constexpr INT timeout_cnt =1000;
-
-
-
 	fp* execute;
-	fp* re_execute;
-
-	//fp execute;
-	//fp re_execute;
 
 private:
 
-	//std::vector<fp> servo_on = { &CModule1::set_disable_voltage };
-	//	,&CModule1::set_shutdown, &CModule1::set_ready_to_switch_on, &CModule1::set_switch_on , &CModule1::end};
-	
 	fp servo_on[6] = { &CModule1::set_disable_voltage ,&CModule1::set_shutdown, &CModule1::set_ready_to_switch_on, &CModule1::set_switch_on, &CModule1::check_servo_on, &CModule1::end };
 	fp move[4] = { &CModule1::set_position, &CModule1::set_point ,&CModule1::clear_set_point, &CModule1::end };
 	fp stand_by[1] = {  &CModule1::end };
 	fp stop[3] = { &CModule1::set_quick_stop,&CModule1::check_quick_stop_state ,&CModule1::end };
 	fp fault_recover[4] = { &CModule1::set_disable_voltage, &CModule1::set_fault_reset, &CModule1::check_servo_off ,&CModule1::end };
 	
-	//std::array<fp,6> servo_on2 = { &CModule1::set_disable_voltage ,&CModule1::set_shutdown, &CModule1::set_ready_to_switch_on, &CModule1::set_switch_on, &CModule1::check_servo_on, &CModule1::end };
-	//static bool check_stopped();
-
-	bool check_servo_on()
+	bool check_servo_on(Motor& motor)
 	{
-		static int cnt = 0;
-		cnt++;
-
-		if (cnt > timeout_cnt) {
+		if (motor.m_timeout_count > timeout_cnt) {
 			execute = stand_by;
-			cnt = 0;
+			motor.m_timeout_count = 0;
+			return fail;
 		}
-		for (auto motor = motors.begin(); motor != motors.end(); motor++) {
-			if ((m_Inputs.status_word & status_word::mask_type2) != status_word::operation_enabled) {
-				execute = re_execute;
-				return fail;
-			}
+
+		if ((m_Inputs.status_word[motor.m_num] & status_word::mask_type2) != status_word::operation_enabled) {
+			motor.m_execute = motor.m_re_execute;
+			return fail;
 		}
-		cnt=0;
-		return success; 
+		else {
+			motor.m_timeout_count = 0;
+			return success;
+		}
 	}
 
-	bool check_servo_off()
+	bool check_servo_off(Motor& motor)
 	{
-		static int cnt = 0;
-		cnt++;
-		if (cnt > timeout_cnt) {
+		if (motor.m_timeout_count > timeout_cnt) {
 			execute = stand_by;
-			cnt = 0;
+			motor.m_timeout_count = 0;
+			return fail;
 		}
 
-		for (auto motor = motors.begin(); motor != motors.end(); motor++) {
-			if ((m_Inputs.status_word & status_word::mask_type1) != status_word::switch_on_disabled) {
-				execute = re_execute;
-				return fail;
-			}
+		if ((m_Inputs.status_word[motor.m_num] & status_word::mask_type1) != status_word::switch_on_disabled) {
+			motor.m_execute = motor.m_re_execute;
+			motor.m_timeout_count++;
+			return fail;
 		}
-
-		cnt = 0;
-		return success;
-	};
-	bool check_quick_stop_state()
+		else {
+			motor.m_timeout_count = 0;
+			return success;
+		}
+	}
+	bool check_quick_stop_state(Motor& motor)
 	{
-		static int cnt = 0;
-		cnt++;
-		if (cnt > timeout_cnt) {
+		if (motor.m_timeout_count > timeout_cnt) {
 			execute = stand_by;
-			cnt = 0;
+			motor.m_timeout_count = 0;
+			return fail;
 		}
 
-		for (auto motor = motors.begin(); motor != motors.end(); motor++) {
-			if ((m_Inputs.status_word & status_word::mask_type2) != status_word::quick_stop_active) {
-				execute = re_execute;
-				return fail;
-			}
+		if ((m_Inputs.status_word[motor.m_num] & status_word::mask_type2) != status_word::quick_stop_active) {
+			motor.m_execute = motor.m_re_execute;
+			return fail;
 		}
 
-		cnt = 0;
+		motor.m_timeout_count = 0;
 		return success;
-	};
+	}
 
 	//bool check_target_reached()
 	//{
@@ -220,9 +201,6 @@ private:
 	//	//}
 	//};
 
-
-
-
 	//bool check_stopped()
 	//{
 	//	for (auto motor = motors.begin(); motor != motors.end(); motor++) {
@@ -244,74 +222,58 @@ private:
 	//}
 
 
-	bool end()
+	bool end(Motor& motor)
 	{
 		// always return false
 		return false;
 	}
 
-	bool set_quick_stop()
+	bool set_quick_stop(Motor& motor)
 	{
-		for (auto motor = motors.begin(); motor != motors.end(); motor++) {
-			m_Outputs.control_word = command::quick_stop;
-		}
+		m_Outputs.control_word[motor.m_num] = command::quick_stop;
 		return success;
 	}
 
-	bool set_position()
+	bool set_position(Motor& motor)
 	{
-		for (auto motor = motors.begin(); motor != motors.end(); motor++) {
-			m_Outputs.target = motor->GetTargetPosition(); //m_DataArea3.target_position;
-		}
+		m_Outputs.target[motor.m_num] = motor.GetTargetPosition(); //m_DataArea3.target_position;
 		return success;
 	}
 
-	bool set_point()
+	bool set_point(Motor& motor)
 	{
-		for (auto motor = motors.begin(); motor != motors.end(); motor++) {
-			m_Outputs.control_word = command::switch_on_and_enable_oepration;
-		}
+		m_Outputs.control_word[motor.m_num] = command::switch_on_and_enable_oepration;
 		return success;
 	}
 
-	bool clear_set_point()
+	bool clear_set_point(Motor& motor)
 	{
-		for (auto motor = motors.begin(); motor != motors.end(); motor++) {
-			m_Outputs.control_word = command::enable_operation;
-		}
-		return success;
-	}
-	
-	bool set_disable_voltage() {
-		for (auto motor = motors.begin(); motor != motors.end(); motor++) {
-			m_Outputs.control_word = command::disable_voltage;
-		}
-		return success;
-	}
-	bool set_shutdown() {
-		for (auto motor = motors.begin(); motor != motors.end(); motor++) {
-			m_Outputs.control_word = command::shutdown;
-		}
+		m_Outputs.control_word[motor.m_num] = command::enable_operation;
 		return success;
 	}
 
-	bool set_switch_on() {
-		for (auto motor = motors.begin(); motor != motors.end(); motor++) {
-			m_Outputs.control_word = command::enable_operation;
-		}
+	bool set_disable_voltage(Motor& motor) {
+		m_Outputs.control_word[motor.m_num] = command::disable_voltage;
 		return success;
 	}
-	bool set_ready_to_switch_on() {
-		for (auto motor = motors.begin(); motor != motors.end(); motor++) {
-			m_Outputs.control_word = command::switch_on;
-		}
+	bool set_shutdown(Motor& motor) {
+		m_Outputs.control_word[motor.m_num] = command::shutdown;
 		return success;
 	}
-	bool set_fault_reset() {
-		for (auto motor = motors.begin(); motor != motors.end(); motor++) {
-			m_Outputs.control_word = command::fault_reset;
-		}
+
+	bool set_switch_on(Motor& motor) {
+		m_Outputs.control_word[motor.m_num] = command::enable_operation;
+		return success;
+	}
+	bool set_ready_to_switch_on(Motor& motor) {
+		m_Outputs.control_word[motor.m_num] = command::switch_on;
+		return success;
+	}
+	bool set_fault_reset(Motor& motor) {
+		m_Outputs.control_word[motor.m_num] = command::fault_reset;
 		return success;
 	}
 
 };
+
+
