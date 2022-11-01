@@ -133,13 +133,14 @@ private:
 			return fail;
 		}
 
-		if ((m_Inputs.status_word[motor.m_num] & status_word::mask_type2) != status_word::operation_enabled) {
-			motor.m_execute = motor.m_re_execute;
-			return fail;
-		}
-		else {
+		if ((m_Inputs.status_word[motor.m_num] & status_word::mask_type2) == status_word::operation_enabled) {
 			motor.m_timeout_count = 0;
 			return success;
+		}
+		else {
+			motor.m_execute = motor.m_re_execute;
+			motor.m_timeout_count++;
+			return fail;
 		}
 	}
 
@@ -151,14 +152,15 @@ private:
 			return fail;
 		}
 
-		if ((m_Inputs.status_word[motor.m_num] & status_word::mask_type1) != status_word::switch_on_disabled) {
+		if ((m_Inputs.status_word[motor.m_num] & status_word::mask_type1) == status_word::switch_on_disabled) {
+			motor.m_timeout_count = 0;
+			return success;
+		}
+		else {
 			motor.m_execute = motor.m_re_execute;
 			motor.m_timeout_count++;
 			return fail;
-		}
-		else {
-			motor.m_timeout_count = 0;
-			return success;
+
 		}
 	}
 	bool check_quick_stop_state(Motor& motor)
@@ -169,13 +171,15 @@ private:
 			return fail;
 		}
 
-		if ((m_Inputs.status_word[motor.m_num] & status_word::mask_type2) != status_word::quick_stop_active) {
+		if ((m_Inputs.status_word[motor.m_num] & status_word::mask_type2) == status_word::quick_stop_active) {
+			motor.m_timeout_count = 0;
+			return success;
+		}
+		else {
 			motor.m_execute = motor.m_re_execute;
+			motor.m_timeout_count++;
 			return fail;
 		}
-
-		motor.m_timeout_count = 0;
-		return success;
 	}
 
 	//bool check_target_reached()
