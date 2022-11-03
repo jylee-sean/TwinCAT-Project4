@@ -27,10 +27,13 @@ typedef struct _command {
 	static constexpr USHORT fault_reset = 0x80;
 }command;
 
-typedef struct status_word {
+typedef struct _status_word {
 
 	static constexpr USHORT mask_type1 = 0x004F;
 	static constexpr USHORT mask_type2 = 0x006F;
+	static constexpr USHORT mask_type3 = 0x0400;
+	static constexpr USHORT mask_set_point_ack = 0x0400;
+
 
 	static constexpr USHORT switch_on_disabled = 0x0040;
 	static constexpr USHORT ready_to_switch_on = 0x0021;
@@ -38,5 +41,12 @@ typedef struct status_word {
 	static constexpr USHORT operation_enabled = 0x0027;
 	static constexpr USHORT fault = 0x0008;
 	static constexpr USHORT quick_stop_active = 0x0007;
+
 	static constexpr USHORT target_reached = 0x0400;
-}aa;
+	static constexpr USHORT set_point_ack = 0x1000;
+
+
+}status_word;
+
+
+

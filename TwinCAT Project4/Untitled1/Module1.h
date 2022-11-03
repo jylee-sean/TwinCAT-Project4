@@ -21,7 +21,6 @@ const PTCID PID_Module1AdsPort        = 0x00000002;
 
 
 
-
 class CModule1 
 	: public ITComObject
 	, public ITcADI
@@ -117,14 +116,33 @@ protected:
 	static constexpr INT timeout_cnt =1000;
 	fp* execute;
 
-private:
+	fp exe;
 
-	fp servo_on[6] = { &CModule1::set_disable_voltage ,&CModule1::set_shutdown, &CModule1::set_ready_to_switch_on, &CModule1::set_switch_on, &CModule1::check_servo_on, &CModule1::end };
-	fp move[4] = { &CModule1::set_position, &CModule1::set_point ,&CModule1::clear_set_point, &CModule1::end };
+private:
+	/*pdo map */
+	fp servo_on[6] = { &CModule1::set_disable_voltage , &CModule1::set_shutdown, &CModule1::set_ready_to_switch_on, &CModule1::set_switch_on, &CModule1::check_servo_on, &CModule1::end };
+
 	fp stand_by[1] = {  &CModule1::end };
 	fp stop[3] = { &CModule1::set_quick_stop,&CModule1::check_quick_stop_state ,&CModule1::end };
 	fp fault_recover[4] = { &CModule1::set_disable_voltage, &CModule1::set_fault_reset, &CModule1::check_servo_off ,&CModule1::end };
 	
+
+	fp arr[4][4] = { { &CModule1::set_disable_voltage, &CModule1::set_shutdown,  &CModule1::set_ready_to_switch_on,  &CModule1::set_switch_on },
+					 { &CModule1::set_position,  &CModule1::set_point, &CModule1::clear_set_point, nullptr },
+					 { &CModule1::set_quick_stop,&CModule1::check_quick_stop_state, nullptr, nullptr },
+					 { &CModule1::set_disable_voltage ,&CModule1::set_fault_reset, nullptr, nullptr }
+					};
+	fp move[6] = { &CModule1::set_position, &CModule1::set_point , &CModule1::check_set_point_ack, &CModule1::clear_set_point, &CModule1::check_target_reached , nullptr};
+
+	void GetState(Motor& motor)
+	{
+		//(m_Inputs.status_word[motor.m_num] & status_word::mask_type2) == status_word::operation_enabled)
+	}
+
+	void GetCommand(Motor& motor)
+	{
+		//return motor.GetCommand();
+	}
 	bool check_servo_on(Motor& motor)
 	{
 		if (motor.m_timeout_count > timeout_cnt) {
@@ -160,7 +178,6 @@ private:
 			motor.m_execute = motor.m_re_execute;
 			motor.m_timeout_count++;
 			return fail;
-
 		}
 	}
 	bool check_quick_stop_state(Motor& motor)
@@ -182,17 +199,36 @@ private:
 		}
 	}
 
-	//bool check_target_reached()
-	//{
-	//	/*for (auto motor = motors.begin(); motor != motors.end(); motor++) {
-	//	if (check_status_word(USHORT target_reached)) {
-	//	motor->UpdateCurrentPosition(m_DataArea3.target_position);
-	//	}
-	//	else {
-	//	return fail;
-	//	}
-	//	}
-	//	return success;*/
+	bool check_target_reached(Motor& motor)
+	{
+		if ((m_Inputs.status_word[motor.m_num] & status_word::mask_type3) == status_word::target_reached) {
+			motor.SetCurrentPosition = motor.GetTargetPosition;
+			return success;
+		}
+		else {
+			return fail;
+		}
+	}
+
+	bool check_set_point_ack(Motor& motor) {
+		if ((m_Inputs.status_word[motor.m_num] & status_word::mask_set_point_ack) == status_word::set_point_ack) {
+			motor.m_set_point_ack_flag = 1;
+			return success;
+		}
+		else {
+			motor.m_set_point_ack_flag = 0;
+			return fail;
+		}
+	}
+		/*for (auto motor = motors.begin(); motor != motors.end(); motor++) {
+		if (check_status_word(USHORT target_reached)) {
+		motor->UpdateCurrentPosition(m_DataArea3.target_position);
+		}
+		else {
+		return fail;
+		}
+		}
+		return success;*/
 
 	//	//for (auto motor = motors.begin(); motor != motors.end(); motor++) {
 
@@ -226,6 +262,17 @@ private:
 	//}
 
 
+	
+	bool check_target_reached() {
+
+		/*case 1. set position*/
+
+		/*case 2. quick stop*/
+
+
+		return success;
+	}
+
 	bool end(Motor& motor)
 	{
 		// always return false
@@ -236,6 +283,7 @@ private:
 	{
 		m_Outputs.control_word[motor.m_num] = command::quick_stop;
 		return success;
+
 	}
 
 	bool set_position(Motor& motor)
