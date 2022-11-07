@@ -5,10 +5,6 @@
 #include "Untitled1Interfaces.h"
 #include "AdsR0.h"
 #include <vector>
-<<<<<<< HEAD
-#include <map>
-=======
->>>>>>> 1c2b7e1486d2fc25535f4f109e6d1e1477a8f50f
 
 //#include "Motor.h"
 //#include <vector>
@@ -117,37 +113,13 @@ protected:
 	ULONG  m_ReadByOidAndPid;
 	
 	std::vector<Motor> motors; 
-<<<<<<< HEAD
 	std::map<int, fp > trainsitionMap;
-=======
->>>>>>> 1c2b7e1486d2fc25535f4f109e6d1e1477a8f50f
 	static constexpr INT timeout_cnt =1000;
-	fp* execute;
 
 	fp exe;
 
-<<<<<<< HEAD
-	int key;
 
-=======
-private:
-	/*pdo map */
-	fp servo_on[6] = { &CModule1::set_disable_voltage , &CModule1::set_shutdown, &CModule1::set_ready_to_switch_on, &CModule1::set_switch_on, &CModule1::check_servo_on, &CModule1::end };
 
-	fp stand_by[1] = {  &CModule1::end };
-	fp stop[3] = { &CModule1::set_quick_stop,&CModule1::check_quick_stop_state ,&CModule1::end };
-	fp fault_recover[4] = { &CModule1::set_disable_voltage, &CModule1::set_fault_reset, &CModule1::check_servo_off ,&CModule1::end };
-	
->>>>>>> 1c2b7e1486d2fc25535f4f109e6d1e1477a8f50f
-
-	fp arr[4][4] = { { &CModule1::set_disable_voltage, &CModule1::set_shutdown,  &CModule1::set_ready_to_switch_on,  &CModule1::set_switch_on },
-					 { &CModule1::set_position,  &CModule1::set_point, &CModule1::clear_set_point, nullptr },
-					 { &CModule1::set_quick_stop,&CModule1::check_quick_stop_state, nullptr, nullptr },
-					 { &CModule1::set_disable_voltage ,&CModule1::set_fault_reset, nullptr, nullptr }
-					};
-	fp move[6] = { &CModule1::set_position, &CModule1::set_point , &CModule1::check_set_point_ack, &CModule1::clear_set_point, &CModule1::check_target_reached , nullptr};
-
-<<<<<<< HEAD
 private:
 
 	void UpdateState(Motor& motor)
@@ -215,201 +187,6 @@ private:
 	bool set_position(Motor& motor)
 	{
 		m_Outputs.target[motor.m_num] = motor.GetTargetPosition(); //m_DataArea3.target_position;
-//		motor.set_position = true;
-		return success;
-	}
-
-	bool set_point(Motor& motor)
-	{
-		m_Outputs.control_word[motor.m_num] = command::switch_on_and_enable_oepration;
-//		motor.set_position = false;
-		return success;
-	}
-
-	bool clear_set_point(Motor& motor)
-	{
-		m_Outputs.control_word[motor.m_num] = command::enable_operation;
-		return success;
-	}
-
-	bool set_disable_voltage(Motor& motor) {
-		m_Outputs.control_word[motor.m_num] = command::disable_voltage;
-		return success;
-	}
-	bool set_shutdown(Motor& motor) {
-		m_Outputs.control_word[motor.m_num] = command::shutdown;
-		return success;
-	}
-
-	bool set_enable(Motor& motor) {
-		m_Outputs.control_word[motor.m_num] = command::enable_operation;
-		return success;
-	}
-	bool set_switch_on(Motor& motor) {
-		m_Outputs.control_word[motor.m_num] = command::switch_on;
-		return success;
-	}
-	bool set_fault_reset(Motor& motor) {
-		m_Outputs.control_word[motor.m_num] = command::fault_reset;
-		return success;
-	}
-
-=======
-	void GetState(Motor& motor)
-	{
-		//(m_Inputs.status_word[motor.m_num] & status_word::mask_type2) == status_word::operation_enabled)
-	}
-
-	void GetCommand(Motor& motor)
-	{
-		//return motor.GetCommand();
-	}
-	bool check_servo_on(Motor& motor)
-	{
-		if (motor.m_timeout_count > timeout_cnt) {
-			execute = stand_by;
-			motor.m_timeout_count = 0;
-			return fail;
-		}
-
-		if ((m_Inputs.status_word[motor.m_num] & status_word::mask_type2) == status_word::operation_enabled) {
-			motor.m_timeout_count = 0;
-			return success;
-		}
-		else {
-			motor.m_execute = motor.m_re_execute;
-			motor.m_timeout_count++;
-			return fail;
-		}
-	}
-
-	bool check_servo_off(Motor& motor)
-	{
-		if (motor.m_timeout_count > timeout_cnt) {
-			execute = stand_by;
-			motor.m_timeout_count = 0;
-			return fail;
-		}
-
-		if ((m_Inputs.status_word[motor.m_num] & status_word::mask_type1) == status_word::switch_on_disabled) {
-			motor.m_timeout_count = 0;
-			return success;
-		}
-		else {
-			motor.m_execute = motor.m_re_execute;
-			motor.m_timeout_count++;
-			return fail;
-		}
-	}
-	bool check_quick_stop_state(Motor& motor)
-	{
-		if (motor.m_timeout_count > timeout_cnt) {
-			execute = stand_by;
-			motor.m_timeout_count = 0;
-			return fail;
-		}
-
-		if ((m_Inputs.status_word[motor.m_num] & status_word::mask_type2) == status_word::quick_stop_active) {
-			motor.m_timeout_count = 0;
-			return success;
-		}
-		else {
-			motor.m_execute = motor.m_re_execute;
-			motor.m_timeout_count++;
-			return fail;
-		}
-	}
-
-	bool check_target_reached(Motor& motor)
-	{
-		if ((m_Inputs.status_word[motor.m_num] & status_word::mask_type3) == status_word::target_reached) {
-			motor.SetCurrentPosition = motor.GetTargetPosition;
-			return success;
-		}
-		else {
-			return fail;
-		}
-	}
-
-	bool check_set_point_ack(Motor& motor) {
-		if ((m_Inputs.status_word[motor.m_num] & status_word::mask_set_point_ack) == status_word::set_point_ack) {
-			motor.m_set_point_ack_flag = 1;
-			return success;
-		}
-		else {
-			motor.m_set_point_ack_flag = 0;
-			return fail;
-		}
-	}
-		/*for (auto motor = motors.begin(); motor != motors.end(); motor++) {
-		if (check_status_word(USHORT target_reached)) {
-		motor->UpdateCurrentPosition(m_DataArea3.target_position);
-		}
-		else {
-		return fail;
-		}
-		}
-		return success;*/
-
-	//	//for (auto motor = motors.begin(); motor != motors.end(); motor++) {
-
-	//	//	if ((m_Inputs.status_word & target_reached) != target_reached) {
-	//	//m_DataArea3.state = state::standby; 
-	//	//		return;
-	//	//	}
-
-	//	//
-	//	//}
-	//};
-
-	//bool check_stopped()
-	//{
-	//	for (auto motor = motors.begin(); motor != motors.end(); motor++) {
-	//		if ((m_Inputs.status_word & status_word::quick_stop_active) == status_word::quick_stop_active) {
-	//			return fail;
-	//		}
-	//	}
-	//	return success;
-	//}
-
-	//bool check_status() {
-	//	for (auto motor = motors.begin(); motor != motors.end(); motor++) {
-	//		//if ((m_Inputs.status_word & fault) == fault) {
-	//		//transition 15
-	//		m_Outputs.control_word = command::fault_reset;
-	//		//}
-	//	}
-	//	return success;
-	//}
-
-
-	
-	bool check_target_reached() {
-
-		/*case 1. set position*/
-
-		/*case 2. quick stop*/
-
-
-		return success;
-	}
-
-	bool end(Motor& motor)
-	{
-		// always return false
-		return false;
-	}
-
-	bool set_quick_stop(Motor& motor)
-	{
-		m_Outputs.control_word[motor.m_num] = command::quick_stop;
-		return success;
-
-	}
-
-	bool set_position(Motor& motor)
-	{
-		m_Outputs.target[motor.m_num] = motor.GetTargetPosition(); //m_DataArea3.target_position;
 		return success;
 	}
 
@@ -447,7 +224,7 @@ private:
 		return success;
 	}
 
->>>>>>> 1c2b7e1486d2fc25535f4f109e6d1e1477a8f50f
+
 };
 
 
