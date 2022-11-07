@@ -120,95 +120,66 @@ protected:
 
 	fp exe;
 
+	int key;
+
 
 
 private:
-	/*pdo map */
 
-	/*state check priority
-	1. fault
-	2. stop
-	3. enable
-	4. disable
-
-	*/
-	enum st{
-		st_switch_on_disabled = 1,
-		st_ready_to_switch_on = 2,
-		st_switch_on = 3,
-		st_operation_enabled = 4,
-		st_set_point = 5,
-		st_target_reached = 6,
-		st_quick_stop_active = 7,
-		st_fault = 8,
-		st_fault_reaction_active = 9,
-
-		st_not_defined = 0
-	};
-	st GetState(Motor& motor)
+	void UpdateState(Motor& motor)
 	{
 		USHORT st = m_Inputs.status_word[motor.m_num] & status_word::mask;
 		USHORT set_point_ack = m_Inputs.status_word[motor.m_num] & status_word::set_point_ack;
-		USHORT reached = m_Inputs.status_word[motor.m_num] & status_word::target_reached;
+		USHORT tgt_reached = m_Inputs.status_word[motor.m_num] & status_word::target_reached;
 
-		if (motor.m_set_point_ack_flag && reached) {
-			motor.m_set_point_ack_flag = false;
-			return st::st_target_reached;
-		}
-
-		if (st == status_word::quick_stop_active)
-			return st::st_quick_stop_active;
-
-		else if (st == status_word::operation_enabled){
-			if (set_point_ack) {
-				/*
-				if (reached) {
-					return st::st_target_reached;
-				}*/
-				motor.m_set_point_ack_flag = true;
-				return st::st_set_point;
+		if (set_point_ack){
+			if (tgt_reached) {
+				motor.SetState(st::st_target_reached);
+				return;
 			}
-			return st::st_operation_enabled;
+			else {
+				motor.SetState(st::st_moving);
+				return;
+			}
 		}
-		else if (st == status_word::switch_on)
-			return st::st_switch_on;
-		else if (st == status_word::ready_to_switch_on)
-			return st::st_ready_to_switch_on;
+
+		if (st == status_word::quick_stop_active) {
+			motor.SetState(st::st_quick_stop_active);
+			return;
+		}
+
+		else if (st == status_word::operation_enabled) {
+			if (set_point_ack) {
+				motor.SetState(st::st_set_point);
+				return;
+			}
+			motor.SetState(st::st_operation_enabled);
+			return;
+		}
+		else if (st == status_word::switch_on) {
+			motor.SetState(st::st_switch_on);
+			return;
+		}
+		else if (st == status_word::ready_to_switch_on) {
+			motor.SetState(st::st_ready_to_switch_on);
+			return;
+		}
 
 		st &= 0xFFDF;
 
-		if (st == status_word::fault_reaction_active)
-			return st::st_fault_reaction_active;
-		else if(st == status_word::fault)
-			return st::st_fault;
-		else if (st == status_word::switch_on_disabled)
-			return st::st_switch_on_disabled;
-		else
-			return st::st_not_defined;
-	}
-
-
-
-	void GetCommand(Motor& motor)
-	{
-		//return motor.GetCommand();
-	}
-	
-	
-	bool check_target_reached(Motor& motor) {
-
-		/*case 1. set position*/
-
-		/*case 2. quick stop*/
-		
-		if (m_Inputs.status_word[motor.m_num] & status_word::target_reached) {
-			return success;
+		if (st == status_word::fault_reaction_active){
+			motor.SetState(st::st_fault_reaction_active);
+			return;
 		}
-		else {
-			return fail;
+		else if (st == status_word::fault) {
+			motor.SetState(st::st_fault);
+			return;
+		}
+		else if (st == status_word::switch_on_disabled) {
+			motor.SetState(st::st_switch_on_disabled);
+			return;
 		}
 	}
-
 
 	bool set_quick_stop(Motor& motor)
 	{
@@ -220,14 +191,14 @@ private:
 	bool set_position(Motor& motor)
 	{
 		m_Outputs.target[motor.m_num] = motor.GetTargetPosition(); //m_DataArea3.target_position;
-		motor.set_position = true;
+//		motor.set_position = true;
 		return success;
 	}
 
 	bool set_point(Motor& motor)
 	{
 		m_Outputs.control_word[motor.m_num] = command::switch_on_and_enable_oepration;
-		motor.set_position = false;
+//		motor.set_position = false;
 		return success;
 	}
 
@@ -246,11 +217,11 @@ private:
 		return success;
 	}
 
-	bool set_switch_on(Motor& motor) {
+	bool set_enable(Motor& motor) {
 		m_Outputs.control_word[motor.m_num] = command::enable_operation;
 		return success;
 	}
-	bool set_ready_to_switch_on(Motor& motor) {
+	bool set_switch_on(Motor& motor) {
 		m_Outputs.control_word[motor.m_num] = command::switch_on;
 		return success;
 	}
