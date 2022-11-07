@@ -1,5 +1,9 @@
 <?xml version="1.0"?>
+<<<<<<< HEAD
 <TcBootProject CreateTime="2022-11-04T16:54:37">
+=======
+<TcBootProject CreateTime="2022-10-28T14:35:57">
+>>>>>>> 1c2b7e1486d2fc25535f4f109e6d1e1477a8f50f
 	<System>
 		<LockedMemSize>33554432</LockedMemSize>
 		<AffinityMask>#xc</AffinityMask>

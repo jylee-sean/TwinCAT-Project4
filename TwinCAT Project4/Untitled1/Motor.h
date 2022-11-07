@@ -23,12 +23,15 @@ private:
 
 
 protected:
+<<<<<<< HEAD
 
 	enum cmd {
 		cmd_off = 0, // d
 		cmd_on=1,    // o
 		cmd_set=2,   // s
 		cmd_halt=4,  // h
+=======
+>>>>>>> 1c2b7e1486d2fc25535f4f109e6d1e1477a8f50f
 
 	};
 	enum st {
@@ -67,6 +70,7 @@ public:
 	typedef bool (CModule1::*fp)(Motor&);
 	int m_num;
 	int m_timeout_count;
+<<<<<<< HEAD
 	//bool(*p)(void);
 	fp* m_execute;
 	fp* m_re_execute;
@@ -75,6 +79,17 @@ public:
 	bool m_target_position_changed;
 
 	Motor() : 
+=======
+
+	//bool(*p)(void);
+	fp* m_execute;
+	fp* m_re_execute;
+	int m_set_point_ack_flag;
+	int m_goal;
+	int m_seq;
+
+	Motor() : m_status_word(0x00),
+>>>>>>> 1c2b7e1486d2fc25535f4f109e6d1e1477a8f50f
 		m_deceleration(6000),
 		m_acceleration(5000),
 		m_velocity(3000),
@@ -83,8 +98,14 @@ public:
 		m_command(0),
 		m_timeout_count(0),
 		m_num(0),
+<<<<<<< HEAD
 		m_target_position_changed(false),
 		m_key(0){}
+=======
+		m_seq(0),
+		m_goal(0),
+		m_set_point_ack_flag(0){}
+>>>>>>> 1c2b7e1486d2fc25535f4f109e6d1e1477a8f50f
 
 	UINT8 GetMode() { return m_mode; }
 
@@ -96,6 +117,7 @@ public:
 	int  GetCommand() { return m_command; }
 
 	void SetNum(int num) { this->m_num = num; }
+<<<<<<< HEAD
 
 	void SetTargetPosition(long val) 
 	{
@@ -152,6 +174,23 @@ public:
 		this->SetCommand(data.command[m_num]);
 		this->SetTargetPosition(data.target_position[m_num]);
 	}
+=======
+	void SetTargetPosition(long val) { m_target_position = val; }
+	void SetCommand(int cmd) { m_command = cmd; };
+	void SetCurrentPosition() { m_current_position = m_target_position;  };
+
+
+	
+	void update(Module1DataArea3 data ) {
+
+		m_command = data.command[m_num];
+		m_target_position = data.target_position[m_num];
+	
+		//data.command;
+		//this->m_target_position = data.target_position;
+	}
+
+>>>>>>> 1c2b7e1486d2fc25535f4f109e6d1e1477a8f50f
 
 };
 

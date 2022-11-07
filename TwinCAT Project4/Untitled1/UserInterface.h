@@ -30,10 +30,14 @@ typedef struct _command {
 typedef struct _status_word {
 
 	static constexpr USHORT mask_type1 = 0x004F;
+<<<<<<< HEAD
 	static constexpr USHORT mask = 0x006F;
 
 	static constexpr USHORT mask2 = 0x146F;
 
+=======
+	static constexpr USHORT mask_type2 = 0x006F;
+>>>>>>> 1c2b7e1486d2fc25535f4f109e6d1e1477a8f50f
 	static constexpr USHORT mask_type3 = 0x0400;
 	static constexpr USHORT mask_set_point_ack = 0x0400;
 
@@ -43,10 +47,15 @@ typedef struct _status_word {
 	static constexpr USHORT switch_on = 0x0023;
 	static constexpr USHORT operation_enabled = 0x0027;
 	static constexpr USHORT fault = 0x0008;
+<<<<<<< HEAD
 	static constexpr USHORT fault_reaction_active = 0x000F;
 	static constexpr USHORT quick_stop_active = 0x0007;
 
 
+=======
+	static constexpr USHORT quick_stop_active = 0x0007;
+
+>>>>>>> 1c2b7e1486d2fc25535f4f109e6d1e1477a8f50f
 	static constexpr USHORT target_reached = 0x0400;
 	static constexpr USHORT set_point_ack = 0x1000;
 

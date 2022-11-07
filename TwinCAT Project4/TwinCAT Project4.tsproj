@@ -230,8 +230,13 @@
 								<ByteSize>24</ByteSize>
 								<Symbol>
 									<Name>command</Name>
+<<<<<<< HEAD
 									<BitSize>64</BitSize>
 									<BaseType GUID="{604191F1-C292-416F-BD1E-CFD75694CE6C}">ARRAY [0..3] OF INT</BaseType>
+=======
+									<BitSize>16</BitSize>
+									<BaseType GUID="{18071995-0000-0000-0000-000000000006}">INT</BaseType>
+>>>>>>> 1c2b7e1486d2fc25535f4f109e6d1e1477a8f50f
 									<BitOffs>0</BitOffs>
 								</Symbol>
 								<Symbol>
